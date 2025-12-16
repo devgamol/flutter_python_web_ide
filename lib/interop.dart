@@ -60,6 +60,10 @@ String getMonacoValue(String containerId) =>
 @JS('monacoInterop.setValue')
 external void setMonacoValue(String containerId, String content);
 
+//Set stdin input
+@JS('setStdin')
+external void setStdin(String value);
+
 @JS('monacoInterop.updateOptions')
 external void updateMonacoOptions(
   String containerId,
