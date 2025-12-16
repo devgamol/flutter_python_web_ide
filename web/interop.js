@@ -4,6 +4,13 @@ let pyodide;
 let monacoLoaded = false;
 let monacoLoadPromise = null;
 
+// --- ADD: stdin support ---
+let stdinBuffer = [];
+
+window.setStdin = function (value) {
+  stdinBuffer = value.split("\n");
+};
+
 // Helper function to clean common invalid characters from code
 function sanitizeCode(code) {
   // Replaces non-breaking spaces and other problematic characters
@@ -665,6 +672,15 @@ window.pyodideInterop = {
       try {
         console.log('Loading Pyodide...');
         pyodide = await loadPyodide();
+
+        // --- ADD: override Python input() ---
+        pyodide.globals.set("input", (msg = "") => {
+          if (stdinBuffer.length === 0) {
+             return "";
+          }
+          return stdinBuffer.shift();
+        });
+
         
         // Set up proper output redirection using the modern Pyodide API
         pyodide.setStdout({

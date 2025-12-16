@@ -80,6 +80,9 @@ class _IDEScreenState extends State<IDEScreen> {
   final TextEditingController _promptController = TextEditingController();
   final FocusNode _promptFocus = FocusNode();
 
+  // stdin controller (for Python input())
+  final TextEditingController _stdinController = TextEditingController();
+
   // State management
   bool _isGenerating = false;
   String? _errorMessage;
@@ -183,6 +186,7 @@ class _IDEScreenState extends State<IDEScreen> {
   void dispose() {
     _promptController.dispose();
     _promptFocus.dispose();
+    _stdinController.dispose(); // stdin dispose
     super.dispose();
   }
 
@@ -469,6 +473,7 @@ print(hello())
 
     try {
       final code = interop.getMonacoValue(id);
+      interop.setStdin(_stdinController.text); // Set stdin input
       final String? error = await interop.runPyodideCode(code);
 
       if (error != null && mounted) {
@@ -491,6 +496,7 @@ print(hello())
           _currentRunningEditorId = null;
         });
       }
+      _stdinController.clear(); // clear input after run
     }
   }
 
@@ -1514,6 +1520,32 @@ print(hello())
                                                 ),
                                                 const SizedBox(width: 8),
                                                 Text('Output ${i + 1}'),
+                                                const SizedBox(width: 10),
+
+                                                // stdin input
+                                                SizedBox(
+                                                  width: 180,
+                                                  child: TextField(
+                                                    controller:
+                                                        _stdinController,
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12,
+                                                    ),
+                                                    decoration:
+                                                        const InputDecoration(
+                                                          hintText: 'Input',
+                                                          hintStyle: TextStyle(
+                                                            color: Colors.grey,
+                                                          ),
+                                                          isDense: true,
+                                                          border:
+                                                              OutlineInputBorder(),
+                                                        ),
+                                                    maxLines: 2,
+                                                  ),
+                                                ),
+
                                                 const Spacer(),
                                                 IconButton(
                                                   icon: const Icon(
